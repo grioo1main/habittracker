@@ -10,11 +10,11 @@ public class User {
     private ArrayList<Habit> listHabbits;
     private static Integer nextId = 0; // static счётчик для генерации ID
 
-    public User(String name, String email, String password, ArrayList<Habit> listHabbits) {
+    public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.listHabbits = listHabbits;
+        this.listHabbits = new ArrayList<>();
         this.id = ++nextId; // Автоматическая генерация ID
     }
 

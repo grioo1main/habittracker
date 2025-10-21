@@ -2,19 +2,26 @@ package com.example.habittracker.service;
 
 import java.util.Iterator;
 
+import org.springframework.stereotype.Service;
+
 import com.example.habittracker.model.Habit;
 import com.example.habittracker.model.User;
 
-class HabitService {
+@Service
+public class HabitService {
 
-    public String addHabit(User user, Habit habit) {
-        user.getListHabbits().add(habit);
-        return "Привычка успешно добавленна !";
+    public boolean addHabit(User user, Habit habit) {
+        try {
+            user.getListHabbits().add(habit);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    public String deleteHabitById(User user, Integer habitId) {
+    public boolean deleteHabitById(User user, Integer habitId) {
         if (user == null || user.getListHabbits() == null || habitId == null)
-            return "Что-то пошло не так , повторите попытку.";
+            return false;
 
         try {
             Iterator<Habit> it = user.getListHabbits().iterator();
@@ -22,21 +29,20 @@ class HabitService {
                 Habit h = it.next();
                 if (habitId.equals(h.getId())) {
                     it.remove();
-                    return "Успешно удаленно !";
+                    return true;
                 }
             }
-            return "Что-то пошло не так , повторите попытку.";
+            return false;
         } catch (Exception e) {
-            return "Убедитесь в корректности кода и повторите попытку.";
+            return false;
 
         }
     }
 
-    public void printHabit(User user){
-        for (Habit habbit : user.getListHabbits()){
+    public void printHabit(User user) {
+        for (Habit habbit : user.getListHabbits()) {
             System.out.println(habbit.toString());
         }
     }
-
 
 }
