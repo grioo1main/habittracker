@@ -1,123 +1,188 @@
 package com.example.habittracker.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name = "habits")
 public class Habit {
-    private Integer id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(length = 500)
     private String description;
-    private String frequency; // "daily" или "weekly"
+
+    // Enum хранится как строка в БД
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Frequency frequency;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
-    private List<LocalDate> completedDates;
-    private static Integer nextId = 0; // Даты выполнения
+
+    // Храним даты выполнения в отдельной таблице
     
-    // Конструктор для создания новой привычки
-    public Habit(String name, String description, String frequency) {
-        this.id = ++nextId; // Генерируем уникальный ID
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "habit_completed_dates", joinColumns = @JoinColumn(name = "habit_id", foreignKey = @ForeignKey(name = "fk_habit_completed_dates_habit", foreignKeyDefinition = "FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE")))
+    @Column(name = "completed_date")
+    private List<LocalDate> completedDates = new ArrayList<>();
+
+    // Связь многие-к-одному с User
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+
+    // Enum для частоты выполнения
+    public enum Frequency {
+        DAILY("Ежедневно"),
+        WEEKLY("Еженедельно"),
+        MONTHLY("Ежемесячно");
+
+        private final String displayName;
+
+        Frequency(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
+    // Конструкторы
+    public Habit() {
+        this.createdAt = LocalDate.now();
+    }
+
+    public Habit(String name, String description, Frequency frequency) {
         this.name = name;
         this.description = description;
         this.frequency = frequency;
         this.createdAt = LocalDate.now();
-        this.completedDates = new ArrayList<>();
     }
-    
-    // Пустой конструктор (для десериализации из JSON)
-    public Habit() {
-        this.completedDates = new ArrayList<>();
-    }
-    
-    // Отметить выполнение на дату
+
+    // === Бизнес-методы ===
+
+    /**
+     * Отметить выполнение привычки на конкретную дату
+     */
     public void markComplete(LocalDate date) {
         if (!completedDates.contains(date)) {
             completedDates.add(date);
         }
     }
-    
-    // Проверить, выполнена ли привычка на дату
+
+    /**
+     * Проверить, выполнена ли привычка на дату
+     */
     public boolean isCompletedOn(LocalDate date) {
         return completedDates.contains(date);
     }
-    
-    // Посчитать текущую серию (streak)
+
+    /**
+     * Подсчитать текущую серию выполнений
+     */
     public int getCurrentStreak() {
         if (completedDates.isEmpty()) {
             return 0;
         }
-        
-        // Сортируем даты по убыванию
+
         List<LocalDate> sorted = new ArrayList<>(completedDates);
-        sorted.sort((d1, d2) -> d2.compareTo(d1));
-        
+        sorted.sort((d1, d2) -> d2.compareTo(d1)); // По убыванию
+
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+
+        // Серия прервана, если нет выполнения сегодня или вчера
+        if (!sorted.contains(today) && !sorted.contains(yesterday)) {
+            return 0;
+        }
+
         int streak = 0;
-        LocalDate checkDate = LocalDate.now();
-        
+        LocalDate checkDate = sorted.contains(today) ? today : yesterday;
+
         for (LocalDate date : sorted) {
-            if (date.equals(checkDate) || date.equals(checkDate.minusDays(1))) {
+            if (date.equals(checkDate)) {
                 streak++;
-                checkDate = date.minusDays(1);
-            } else {
-                break;
+                checkDate = checkDate.minusDays(1);
+            } else if (date.isBefore(checkDate)) {
+                break; // Пропуск в датах
             }
         }
-        
+
         return streak;
     }
-    
+
     // Геттеры и сеттеры
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
-    
-    public void setId(Integer id) {
+
+    public void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    public String getFrequency() {
+
+    public Frequency getFrequency() {
         return frequency;
     }
-    
-    public void setFrequency(String frequency) {
+
+    public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
-    
+
     public LocalDate getCreatedAt() {
         return createdAt;
     }
-    
+
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
-    
+
     public List<LocalDate> getCompletedDates() {
         return completedDates;
     }
-    
+
     public void setCompletedDates(List<LocalDate> completedDates) {
         this.completedDates = completedDates;
     }
-    
-    // Красивый вывод в консоль
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
-        return String.format("ID: %s | %s (%s) | Streak: %d дней", 
-            id , name, frequency, getCurrentStreak());
+        return String.format("Habit{id=%d, name='%s', frequency=%s, streak=%d}",
+                id, name, frequency, getCurrentStreak());
     }
 }

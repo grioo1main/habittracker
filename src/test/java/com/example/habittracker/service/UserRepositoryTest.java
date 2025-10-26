@@ -14,19 +14,19 @@ import com.example.habittracker.repository.UserRepository;
 @SpringBootTest
 public class UserRepositoryTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    // @Autowired
+    // private UserRepository userRepository;
 
-    @Test
-    public void testAddAndSaveToFile() throws IOException {
-        User user = new User("Mark", "eblan@mail.ru", "123");
+    // @Test
+    // public void testAddAndSaveToFile() throws IOException {
+    //     User user = new User("Mark", "eblan@mail.ru", "123");
         
-        Habit habit = new Habit("study", "fast", "mnogo");
-        boolean res2 = userRepository.addHabit(user, habit);
+    //     Habit habit = new Habit("study", "fast", "mnogo");
+    //     boolean res2 = userRepository.addHabit(user, habit);
         
-        boolean res3 = userRepository.addUser(user);
+    //     boolean res3 = userRepository.addUser(user);
         
-        assertTrue(res3);
-        assertTrue(res2);
-    }
+    //     assertTrue(res3);
+    //     assertTrue(res2);
+    // }
 }

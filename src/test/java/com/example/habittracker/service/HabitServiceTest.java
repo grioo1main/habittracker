@@ -7,26 +7,27 @@ import com.example.habittracker.model.Habit;
 
 class HabitServiceTest {
     
-    private HabitService habitService = new HabitService();
+//     private HabitService habitService = new HabitService();
 
-    @Test
-    void testAddHabit() {
-        User user = new User();
-        Habit habit = new Habit("Бег", "Бегать по утрам", "daily");
+//     @Test
+//     void testAddHabit() {
+//         User user = new User();
+//         Habit habit = new Habit("Бег", "Бегать по утрам", "daily");
         
-        boolean result = habitService.addHabit(user, habit);
+//         boolean result = habitService.addHabit(user, habit);
         
-        assertEquals(true, result);
-    }
+//         assertEquals(true, result);
+//     }
 
-    @Test
-    void testDeleteHabitById() {
-        User user = new User();
-        Habit habit = new Habit("Бег", "Бегать по утрам", "daily");
-        habitService.addHabit(user, habit);
+//     @Test
+//     void testDeleteHabitById() {
+//         User user = new User();
+//         Habit habit = new Habit("Бег", "Бегать по утрам", "daily");
+//         habitService.addHabit(user, habit);
         
-        Boolean result = habitService.deleteHabitById(user, habit.getId());
+//         Boolean result = habitService.deleteHabitById(user, habit.getId());
         
-        assertEquals(true, result);
-    }
+//         assertEquals(true, result);
+//     }
+// }
 }

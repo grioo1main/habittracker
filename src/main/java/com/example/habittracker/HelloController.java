@@ -3,6 +3,7 @@ package com.example.habittracker;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 public class HelloController {
     
@@ -10,4 +11,5 @@ public class HelloController {
     public String hello() {
         return "Привет из Spring Boot!";
     }
+
 }
